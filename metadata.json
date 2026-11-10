@@ -1,0 +1,6 @@
+{
+  "name": "Noob Toon",
+  "description": "Painel completo para criadores no YouTube com trilha de 6 etapas do zero, mentor com IA, biblioteca de vídeos, 200 legendas prontas e 50 ideias para Shorts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

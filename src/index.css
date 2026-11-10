@@ -1,0 +1,93 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg: #050507;
+  --surface: #0d0c12;
+  --surface2: #15131c;
+  --line: #2a2633;
+  --fg: #efe9f4;
+  --muted: #9a93a6;
+  --pink: #ff5fa2;
+  --orange: #ffa45c;
+  --purple: #a77bff;
+  --teal: #3ee6d0;
+  --glow: 0.35;
+  --sunset: linear-gradient(100deg, var(--orange) 0%, var(--pink) 50%, var(--purple) 100%);
+  --f-display: "Anton", "Impact", "Arial Narrow Bold", sans-serif;
+  --f-body: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --f-script: "Yellowtail", "Brush Script MT", cursive;
+  color-scheme: dark;
+}
+
+body.light, html.light {
+  --bg: #f7f3f6;
+  --surface: #ffffff;
+  --surface2: #f1ebf1;
+  --line: #e0d6e0;
+  --fg: #1a1420;
+  --muted: #6b6275;
+  --pink: #d0246c;
+  --orange: #c75f12;
+  --purple: #6d3fd6;
+  --teal: #0b8a80;
+  --glow: 0.12;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.5;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.font-display {
+  font-family: var(--f-display);
+}
+
+.font-script {
+  font-family: var(--f-script);
+}
+
+.neon {
+  color: var(--pink);
+  text-shadow: 0 0 6px rgba(255, 95, 162, var(--glow)), 0 0 18px rgba(255, 95, 162, calc(var(--glow) * 0.6));
+}
+
+.sunset {
+  background: var(--sunset);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 10px rgba(255, 95, 162, var(--glow)));
+}
+
+.sunset-bg {
+  background: var(--sunset);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--purple);
+}
