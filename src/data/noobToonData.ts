@@ -1,3 +1,161 @@
+export interface FunnelStep {
+  id: string;
+  code: string;
+  title: string;
+  description: string;
+  actionHref?: string;
+  actionLabel?: string;
+  actionTab?: 'play' | 'titles' | 'ideas' | 'rules';
+  secondaryTab?: 'play' | 'titles' | 'ideas' | 'rules';
+  secondaryLabel?: string;
+}
+
+export interface FunnelPhase {
+  id: number;
+  title: string;
+  subtitle: string;
+  steps: FunnelStep[];
+}
+
+export const FUNNEL_PHASES: FunnelPhase[] = [
+  {
+    id: 1,
+    title: 'FASE 1: Criação da Conta e do Canal',
+    subtitle: 'Separe sua conta pessoal e crie o canal pronto para o nicho.',
+    steps: [
+      {
+        id: '1.1',
+        code: '1.1',
+        title: 'Passo 1.1: Criar uma Conta Google exclusiva',
+        description: 'Crie um e-mail Gmail dedicado apenas a este projeto para separar seus dados pessoais do canal.',
+        actionHref: 'https://accounts.google.com/signup',
+        actionLabel: 'Criar Gmail'
+      },
+      {
+        id: '1.2',
+        code: '1.2',
+        title: 'Passo 1.2: Criar o Canal no YouTube',
+        description: 'Acesse o YouTube logado na nova conta, clique na foto de perfil (canto superior direito) > "Criar um canal". Escolha um Nome alinhado ao nicho dos vídeos da plataforma e defina um identificador (@handle) único.',
+        actionHref: 'https://www.youtube.com',
+        actionLabel: 'Abrir YouTube'
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: 'FASE 2: Configuração e Blindagem no YouTube Studio',
+    subtitle: 'Identidade visual, palavras-chave para o algoritmo e verificação de segurança.',
+    steps: [
+      {
+        id: '2.1',
+        code: '2.1',
+        title: 'Passo 2.1: Identidade Visual (Branding)',
+        description: 'Acesse o YouTube Studio > Personalização > Branding. Adicione uma foto de perfil legível (mínimo 98x98px), um banner do nicho (2048x1152px) e preencha a descrição em "Informações básicas" com palavras-chave do seu tema.',
+        actionHref: 'https://studio.youtube.com',
+        actionLabel: 'YouTube Studio'
+      },
+      {
+        id: '2.2',
+        code: '2.2',
+        title: 'Passo 2.2: Algoritmo e País',
+        description: 'Vá em Configurações > Canal > Informações básicas. Selecione "Brasil" (ou o país do seu público) e adicione de 5 a 10 palavras-chave do nicho (ex: cortes, podcast, motivação, finanças).',
+        actionHref: 'https://studio.youtube.com',
+        actionLabel: 'Configurações do Studio'
+      },
+      {
+        id: '2.3',
+        code: '2.3',
+        title: 'Passo 2.3: Liberar Recursos Avançados',
+        description: 'Vá em Configurações > Canal > Qualificação para recursos. Valide seu número de telefone via SMS (Recursos intermediários) e faça a verificação por vídeo/documento (Recursos avançados) para liberar links na descrição e aumentar o limite diário de postagens.',
+        actionHref: 'https://studio.youtube.com',
+        actionLabel: 'Verificar Conta'
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: 'FASE 3: Pegar Vídeo Pronto e Postar (Rotina Diária)',
+    subtitle: 'Baixe o material limpo da plataforma, configure metadados e multiplique o alcance.',
+    steps: [
+      {
+        id: '3.1',
+        code: '3.1',
+        title: 'Passo 3.1: Baixar Material na Plataforma',
+        description: 'Acesse a aba de vídeos no menu lateral esquerdo, escolha um vídeo pronto (9:16), baixe o arquivo .mp4 e copie o Título, a Descrição e as Hashtags já prontos.',
+        actionTab: 'play',
+        actionLabel: 'Ir para Vídeos (Play)',
+        secondaryTab: 'titles',
+        secondaryLabel: 'Copiar Títulos & Hashtags'
+      },
+      {
+        id: '3.2',
+        code: '3.2',
+        title: 'Passo 3.2: Enviar para o YouTube',
+        description: 'No YouTube (PC ou celular), clique no ícone "+" (Criar) > "Enviar vídeos" e selecione o arquivo baixado.',
+        actionHref: 'https://studio.youtube.com',
+        actionLabel: 'Enviar no Studio'
+      },
+      {
+        id: '3.3',
+        code: '3.3',
+        title: 'Passo 3.3: Configurar Metadados e Publicar',
+        description: 'Cole o Título (até 60 caracteres para não cortar no celular), cole a Descrição com as hashtags (3 a 5 hashtags no máximo), marque obrigatoriamente "Não é conteúdo para crianças" e clique em Publicar (ou programe para horários de pico: 12h, 18h ou 21h).'
+      },
+      {
+        id: '3.4',
+        code: '3.4',
+        title: 'Passo 3.4: Multiplicar Alcance (Bônus Multiplataforma)',
+        description: 'Use o mesmo arquivo .mp4 e as mesmas legendas/hashtags para postar também no TikTok e no Instagram Reels (como Reel), multiplicando suas visualizações sem precisar editar nada.'
+      }
+    ]
+  }
+];
+
+export interface PlatformRuleCard {
+  id: number;
+  title: string;
+  dont: string;
+  doRight?: string;
+}
+
+export const PLATFORM_RULES: PlatformRuleCard[] = [
+  {
+    id: 1,
+    title: 'Limite Diário e Prevenção contra Spam (Crítico para Canais Novos)',
+    dont: 'Postar 15, 20 ou 30 vídeos de uma vez em um canal recém-criado. O algoritmo identifica como comportamento de robô (spam) e suspende o canal.',
+    doRight: 'Comece postando de 1 a 3 vídeos por dia com consistência e aumente gradualmente após verificar os Recursos Avançados no YouTube Studio.'
+  },
+  {
+    id: 2,
+    title: 'Direitos Autorais e Conteúdo Reutilizado',
+    dont: 'Repostar vídeos longos inteiros sem cortes ou usar músicas comerciais protegidas por direitos autorais fora das bibliotecas permitidas.',
+    doRight: 'Utilize sempre os vídeos já editados e dinamizados da nossa plataforma (com cortes de ritmo, legendas e enquadramento), pois eles possuem camada de transformação exigida pelas diretrizes.'
+  },
+  {
+    id: 3,
+    title: "Proibição de Marcas d'Água de Outras Redes",
+    dont: 'Baixar um vídeo postado no TikTok ou Kwai com o logotipo flutuante e postar no YouTube Shorts ou Instagram Reels (e vice-versa). Os algoritmos derrubam o alcance imediatamente.',
+    doRight: 'Baixe sempre o arquivo limpo diretamente da nossa plataforma para postar no YouTube, TikTok e Instagram.'
+  },
+  {
+    id: 4,
+    title: 'Excesso de Hashtags e Clickbait Enganoso',
+    dont: 'Colocar 20 hashtags na descrição ou usar hashtags famosas que não têm relação com o tema do vídeo (ex: #futebol em vídeo de negócios).',
+    doRight: 'Use apenas as 3 a 5 hashtags específicas fornecidas junto com o vídeo na nossa plataforma.'
+  },
+  {
+    id: 5,
+    title: 'Conteúdo Sensível e Diretrizes da Comunidade (Risco de Strike)',
+    dont: 'Publicar vídeos com violência explícita, discurso de ódio, nudez, desafios perigosos ou promessas financeiras/médicas enganosas. 3 avisos (Strikes) em 90 dias excluem o canal permanentemente.'
+  },
+  {
+    id: 6,
+    title: 'Links Clicáveis na Descrição',
+    dont: 'Tentar colar links externos de afiliado ou vendas na descrição de Shorts em canais recém-criados (o YouTube bloqueia o clique por padrão).',
+    doRight: 'Libere primeiro os "Recursos Avançados" no YouTube Studio e utilize o link na bio do canal ou a função "Vídeo Relacionado".'
+  }
+];
+
 export interface StageModule {
   t: string;
   s: string;
@@ -42,78 +200,6 @@ export const MODS: StageModule[] = [
       "Passo a passo para criar o canal do zero",
       "Escreva uma descrição magnética para o meu canal",
       "Quais dimensões usar no banner e avatar?"
-    ]
-  },
-  {
-    t: "Prepare seu conteúdo",
-    s: "Planeje seus primeiros vídeos e Shorts.",
-    tasks: ["Escolher o tema do vídeo", "Criar título e roteiro", "Separar os materiais necessários"],
-    hints: [
-      "Uma curiosidade ou dúvida real que seu público pesquisa no YouTube.",
-      "Gancho forte nos primeiros 3 segundos para reter a atenção máxima.",
-      "Celular, iluminação natural ou ring light, áudio limpo e roteiro em tópicos."
-    ],
-    links: [null, null, null],
-    chips: [
-      "Me dê 10 ideias de vídeos para o primeiro mês",
-      "Escreva um roteiro curto de 45 segundos para Shorts",
-      "Como gravar bons vídeos usando apenas o celular?"
-    ]
-  },
-  {
-    t: "Grave e edite",
-    s: "Produza seu vídeo com ferramentas simples e gratuitas.",
-    tasks: ["Gravar o conteúdo", "Editar o vídeo", "Criar a thumbnail"],
-    hints: [
-      "Grave de frente para a luz, celular na altura dos olhos e câmera limpa.",
-      "Corte pausas e silêncios. Aplicativos como CapCut resolvem rápido.",
-      "Foco único, até 4 palavras grandes e contraste de cores chamativo."
-    ],
-    links: [null, null, null],
-    chips: [
-      "Tenho vergonha de gravar. Como começar?",
-      "Dicas práticas de edição rápida no CapCut",
-      "Como criar títulos e capas que dão muitos cliques?"
-    ]
-  },
-  {
-    t: "Publique seu vídeo",
-    s: "Envie e publique seu primeiro vídeo no YouTube.",
-    tasks: ["Enviar o vídeo", "Adicionar título e descrição", "Publicar"],
-    hints: [
-      "YouTube Studio → Criar → Enviar vídeos.",
-      "Palavra-chave principal no título e nas primeiras linhas da descrição.",
-      "Visibilidade: Público, ou Programar para o melhor horário do seu nicho."
-    ],
-    links: [
-      { href: "https://studio.youtube.com", label: "Studio" },
-      null,
-      null
-    ],
-    chips: [
-      "Escreva a descrição e hashtags do meu vídeo",
-      "Qual o melhor horário para postar Shorts?",
-      "Como funciona o algoritmo do YouTube para canais novos?"
-    ]
-  },
-  {
-    t: "Cresça e monetize",
-    s: "Acompanhe resultados e desenvolva seu canal.",
-    tasks: ["Analisar visualizações", "Planejar novos conteúdos", "Conhecer as opções de monetização"],
-    hints: [
-      "Studio → Estatísticas: acompanhe a taxa de cliques e retenção de público.",
-      "Repita os temas que deram mais visualizações e teste variações.",
-      "Programa de Parcerias do YouTube, links de afiliados, patrocínios e produtos."
-    ],
-    links: [
-      { href: "https://studio.youtube.com", label: "Studio" },
-      null,
-      { href: "https://support.google.com/youtube/answer/72851", label: "Requisitos de Parceria" }
-    ],
-    chips: [
-      "Meu vídeo teve poucas visualizações, o que ajustar?",
-      "Monte um calendário semanal de postagens",
-      "Quais os requisitos atuais para monetizar o canal?"
     ]
   }
 ];

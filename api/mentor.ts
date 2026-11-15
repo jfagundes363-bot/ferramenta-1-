@@ -1,4 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
+import { buildMentorLocalReply, buildMentorSystemInstruction, MentorContext } from '../src/data/mentorKnowledge';
 
 export default async function handler(req: any, res: any) {
   // Set CORS headers for Vercel
@@ -18,66 +19,94 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
+  const {
+    message,
+    history,
+    userName,
+    stepTitle,
+    stepSummary,
+    completedCount,
+    totalSteps,
+    completedStepIds,
+    currentTab
+  } = req.body || {};
+
+  if (!message || typeof message !== 'string') {
+    return res.status(400).json({ error: 'Mensagem vazia' });
+  }
+
+  const mentorCtx: MentorContext = {
+    userName,
+    stepTitle,
+    stepSummary,
+    completedCount,
+    totalSteps,
+    completedStepIds,
+    currentTab
+  };
+
   try {
-    const { message, history, userName, stepTitle, stepSummary, tasks } = req.body || {};
-
-    if (!message) {
-      return res.status(400).json({ error: 'Mensagem vazia' });
-    }
-
     const apiKey = process.env.GEMINI_API_KEY;
     const isPlaceholder = !apiKey || apiKey === 'MY_GEMINI_API_KEY' || apiKey.trim() === '';
     if (isPlaceholder) {
       return res.status(200).json({
-        text: `Olá, ${userName || 'Criador'}! Para a etapa "${stepTitle || 'Atual'}", recomendo focar em dar um passo de cada vez: primeiro conclua o checklist e defina seu público e formato curto. Como posso te apoiar nesta tarefa específica?`
+        text: buildMentorLocalReply(message, mentorCtx)
       });
     }
 
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
+    });
 
-    const systemInstruction = `Você é o mentor especialista da ferramenta Noob Toon, que guia criadores iniciantes a construírem um canal de sucesso no YouTube do zero, com foco especial em vídeos e Shorts.
-Aluno: ${userName || 'Criador'}.
-Etapa atual: "${stepTitle || 'Etapa'}" — ${stepSummary || ''}
-Tarefas desta etapa: ${(tasks || []).join('; ')}.
+    const systemInstruction = buildMentorSystemInstruction(mentorCtx);
 
-Diretrizes:
-- Responda sempre em português do Brasil com tom caloroso, prático, encorajador e direto.
-- Dê passos acionáveis, exemplos reais e dicas práticas para quem está começando agora com celular ou poucos recursos.
-- Mantenha a resposta concisa e bem formatada com listas curtas e negrito nos pontos-chave (máximo ~250 palavras).
-- Não invente regras do YouTube; indique a Central de Ajuda oficial do YouTube quando for algo que muda com frequência.`;
-
-    const chatContents = [];
+    const chatContents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
     if (Array.isArray(history)) {
       for (const item of history.slice(-8)) {
+        const txt = (item?.content || item?.text || '').trim();
+        if (!txt) continue;
         if (item.role === 'user' || item.role === 'bot' || item.role === 'assistant') {
-          chatContents.push({
-            role: item.role === 'bot' ? 'model' : item.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: item.content || item.text || '' }]
-          });
+          const role = item.role === 'user' ? 'user' : 'model';
+          if (chatContents.length > 0 && chatContents[chatContents.length - 1].role === role) {
+            chatContents[chatContents.length - 1].parts[0].text += `\n${txt}`;
+          } else {
+            chatContents.push({ role, parts: [{ text: txt }] });
+          }
         }
       }
     }
-    chatContents.push({
-      role: 'user',
-      parts: [{ text: message }]
-    });
+
+    const lastEntry = chatContents[chatContents.length - 1];
+    if (!lastEntry || lastEntry.role !== 'user' || lastEntry.parts[0].text !== message.trim()) {
+      if (lastEntry && lastEntry.role === 'user') {
+        lastEntry.parts[0].text += `\n${message.trim()}`;
+      } else {
+        chatContents.push({
+          role: 'user',
+          parts: [{ text: message.trim() }]
+        });
+      }
+    }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
+      model: 'gemini-4-hydrogen',
       contents: chatContents,
       config: {
-        systemInstruction: systemInstruction,
-        temperature: 0.7,
+        systemInstruction,
       }
     });
 
-    const reply = response.text || 'Não consegui formular uma resposta no momento. Pode tentar reformular a pergunta?';
+    const reply = response.text?.trim() || buildMentorLocalReply(message, mentorCtx);
     return res.status(200).json({ text: reply });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in mentor API:', error);
-    return res.status(500).json({
-      error: 'Erro ao consultar o mentor.',
-      text: 'Desculpe, tive uma instabilidade momentânea na conexão. Por favor tente novamente em alguns segundos!'
+    return res.status(200).json({
+      text: buildMentorLocalReply(message, mentorCtx)
     });
   }
 }
