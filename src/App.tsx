@@ -14,7 +14,6 @@ import {
   Sparkles,
   Bot,
   User,
-  RotateCcw,
   Sun,
   Moon,
   AlertCircle,
@@ -45,6 +44,7 @@ interface CreatorLinkCard {
   name: string;
   imageUrl: string;
   fallbackUrl: string;
+  linkUrl?: string;
 }
 
 const CREATOR_LINKS: CreatorLinkCard[] = [
@@ -53,6 +53,7 @@ const CREATOR_LINKS: CreatorLinkCard[] = [
     name: 'Davy Jones',
     imageUrl: '/assets/creators/davy-jones.webp',
     fallbackUrl: 'https://i.imgur.com/s0kKjmkm.jpg',
+    linkUrl: 'https://drive.google.com/drive/folders/1-q9XRIKVw3xrWaGjbXf-1_IS0bqCV76H?usp=sharing',
   },
   {
     id: 'paulinho-loko',
@@ -203,6 +204,7 @@ export default function App() {
 
   const [settingsName, setSettingsName] = useState<string>(state.name);
   const [settingsToast, setSettingsToast] = useState<string>('');
+  const [confirmReset, setConfirmReset] = useState<boolean>(false);
 
   const [isDesktop, setIsDesktop] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -232,7 +234,11 @@ export default function App() {
 
   // Sync state to localStorage & theme to document
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch {
+      // Ignore storage quota / privacy mode errors
+    }
     if (state.theme === 'light') {
       document.body.classList.add('light');
       document.documentElement.classList.remove('dark');
@@ -310,6 +316,9 @@ export default function App() {
     if (allStagesDone) {
       handleSelectTab('play');
       return;
+    }
+    if (searchQuery) {
+      setSearchQuery('');
     }
     const targetPhaseId = nextPendingStep.phaseId;
     setExpandedPhases(prev => ({ ...prev, [targetPhaseId]: true }));
@@ -425,18 +434,29 @@ export default function App() {
 
   // Copy helper
   const copyText = (text: string, onDone: () => void) => {
-    navigator.clipboard.writeText(text).then(() => {
-      onDone();
-    }).catch(() => {
-      // Fallback
+    const fallbackCopy = () => {
       const ta = document.createElement('textarea');
       ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
       document.body.appendChild(ta);
       ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
+      try {
+        document.execCommand('copy');
+      } finally {
+        document.body.removeChild(ta);
+      }
       onDone();
-    });
+    };
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        onDone();
+      }).catch(fallbackCopy);
+    } else {
+      fallbackCopy();
+    }
   };
 
   // Filtered funnel phases based on search query
@@ -551,7 +571,6 @@ export default function App() {
   }
 
   // ==================== MAIN DASHBOARD ====================
-  const curMod = MODS[currentStep] || MODS[0];
 
   const navItems: Array<{ id: 'home' | 'rules' | 'play' | 'titles' | 'ideas' | 'settings'; label: string; mobileLabel?: string; icon: React.ReactNode }> = [
     { id: 'home', label: 'Inicial', mobileLabel: 'Inicial', icon: <Home className="w-5 h-5 shrink-0" /> },
@@ -1340,21 +1359,32 @@ export default function App() {
                         </h3>
                       </div>
 
-                      {/* Click-only button placeholder (link access removed until user provides URLs) */}
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setClickedCreatorId((prev) => (prev === creator.id ? null : creator.id))
-                        }
-                        className={`mt-auto w-full py-3.5 px-5 rounded-xl font-display text-lg tracking-wider uppercase font-bold transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-[0.97] ${
-                          isSelected
-                            ? 'bg-[var(--surface2)] text-[var(--pink)] border border-[var(--pink)]/60 shadow-[0_0_16px_rgba(255,95,162,0.2)]'
-                            : 'sunset-bg text-[#16061a] shadow-[0_0_20px_rgba(255,95,162,0.3)] hover:shadow-[0_0_28px_rgba(255,95,162,0.5)] hover:-translate-y-0.5'
-                        }`}
-                      >
-                        <span>{isSelected ? 'Link em breve' : 'Acessar Link'}</span>
-                        <ArrowRight className="w-4 h-4 shrink-0" />
-                      </button>
+                      {creator.linkUrl ? (
+                        <a
+                          href={creator.linkUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-auto w-full py-3.5 px-5 rounded-xl font-display text-lg tracking-wider uppercase font-bold transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-[0.97] sunset-bg text-[#16061a] shadow-[0_0_20px_rgba(255,95,162,0.3)] hover:shadow-[0_0_28px_rgba(255,95,162,0.5)] hover:-translate-y-0.5 no-underline"
+                        >
+                          <span>Acessar Link</span>
+                          <ExternalLink className="w-4 h-4 shrink-0" />
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setClickedCreatorId((prev) => (prev === creator.id ? null : creator.id))
+                          }
+                          className={`mt-auto w-full py-3.5 px-5 rounded-xl font-display text-lg tracking-wider uppercase font-bold transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-[0.97] ${
+                            isSelected
+                              ? 'bg-[var(--surface2)] text-[var(--pink)] border border-[var(--pink)]/60 shadow-[0_0_16px_rgba(255,95,162,0.2)]'
+                              : 'sunset-bg text-[#16061a] shadow-[0_0_20px_rgba(255,95,162,0.3)] hover:shadow-[0_0_28px_rgba(255,95,162,0.5)] hover:-translate-y-0.5'
+                          }`}
+                        >
+                          <span>{isSelected ? 'Link em breve' : 'Acessar Link'}</span>
+                          <ArrowRight className="w-4 h-4 shrink-0" />
+                        </button>
+                      )}
                     </article>
                   );
                 })}
@@ -1777,27 +1807,45 @@ export default function App() {
               <p className="text-xs text-[var(--muted)]">
                 Deseja recomeçar as tarefas da trilha do zero? Seu nome continuará salvo.
               </p>
-              <button
-                type="button"
-                onClick={() => {
-                  if (window.confirm(`Tem certeza de que deseja zerar o progresso das ${FUNNEL_PHASES.length} fases da trilha?`)) {
-                    setState(prev => ({
-                      ...prev,
-                      tasks: {},
-                      done: {},
-                      funnelDone: {},
-                      last: 0
-                    }));
-                    setCurrentStep(0);
-                    setExpandedPhases({ 1: true, 2: false, 3: false });
-                    setSettingsToast('Progresso reiniciado com sucesso.');
-                    setTimeout(() => setSettingsToast(''), 3000);
-                  }
-                }}
-                className="self-start px-4 py-2.5 rounded-xl border border-[var(--line)] text-xs font-bold text-[var(--muted)] hover:text-white hover:border-[#ffa45c] transition-colors cursor-pointer"
-              >
-                Zerar checklist da trilha
-              </button>
+              {!confirmReset ? (
+                <button
+                  type="button"
+                  onClick={() => setConfirmReset(true)}
+                  className="self-start px-4 py-2.5 rounded-xl border border-[var(--line)] text-xs font-bold text-[var(--muted)] hover:text-[var(--fg)] hover:border-[#ffa45c] transition-colors cursor-pointer"
+                >
+                  Zerar checklist da trilha
+                </button>
+              ) : (
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setState(prev => ({
+                        ...prev,
+                        tasks: {},
+                        done: {},
+                        funnelDone: {},
+                        last: 0
+                      }));
+                      setCurrentStep(0);
+                      setExpandedPhases({ 1: true, 2: false, 3: false });
+                      setConfirmReset(false);
+                      setSettingsToast('Progresso reiniciado com sucesso.');
+                      setTimeout(() => setSettingsToast(''), 3000);
+                    }}
+                    className="px-4 py-2.5 rounded-xl border border-[#ffa45c] bg-[#ffa45c]/15 text-xs font-bold text-[#ffa45c] hover:bg-[#ffa45c]/25 transition-colors cursor-pointer"
+                  >
+                    Confirmar: zerar progresso
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmReset(false)}
+                    className="px-4 py-2.5 rounded-xl border border-[var(--line)] text-xs font-bold text-[var(--muted)] hover:text-[var(--fg)] transition-colors cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              )}
             </div>
           </main>
         )}

@@ -106,7 +106,7 @@ export function buildMentorLocalReply(message: string, ctx: MentorContext): stri
   }
 
   // 2. Specific Phase match (fase 1, fase 2, fase 3)
-  if (/\bfase\s*1\b/.test(q)) {
+  if (/\b(fase|etapa)\s*1\b/.test(q)) {
     const p = FUNNEL_PHASES[0];
     return [
       `A **${p.title}** prepara a base da sua operação:`,
@@ -117,7 +117,7 @@ export function buildMentorLocalReply(message: string, ctx: MentorContext): stri
       'Dica: Assim que marcar os 2 passos como concluídos, a Fase 2 abre automaticamente.',
     ].join('\n');
   }
-  if (/\bfase\s*2\b/.test(q)) {
+  if (/\b(fase|etapa)\s*2\b/.test(q)) {
     const p = FUNNEL_PHASES[1];
     return [
       `A **${p.title}** blinda o canal e configura o algoritmo:`,
@@ -127,7 +127,7 @@ export function buildMentorLocalReply(message: string, ctx: MentorContext): stri
       `3. **${p.steps[2].title}:** ${p.steps[2].description}`,
     ].join('\n');
   }
-  if (/\bfase\s*3\b/.test(q)) {
+  if (/\b(fase|etapa)\s*3\b/.test(q)) {
     const p = FUNNEL_PHASES[2];
     return [
       `A **${p.title}** é a sua rotina diária de postagens:`,
